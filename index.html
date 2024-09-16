@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <title>Clase 41 peticiones</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS v5.2.1 -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+    </head>
+
+    <body>
+        <div id="app" class="container py-5">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <button v-if="informacion.prev != null" @click="anterior()" class="btn btn-warning">Anterior</button>
+                </div>
+                <div class="col-md-4">
+                    <!-- <button @click="obtenerPersonajes()" class="btn btn-primary">Cargar</button> -->
+                </div>
+                <div class="col-md-4">
+                    <button v-if="informacion.next != null" @click="siguiente()" class="btn btn-warning">Siguiente</button>
+                </div>
+            </div>
+
+
+
+
+
+            
+
+            <div  class="row justify-content-center">
+                <div v-for="item in personajes" class="col-md-3">
+                    <div class="card m-1" @click="abrirModal(item)">
+                        <img :src="item.image" class="card-img-top" alt="Img">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">description</p>
+                        </div>
+                    </div>       
+                </div>
+            </div> 
+            
+            <!-- Modal -->
+                <div class="modal fade" id="modalPersonaje" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5>Informacion</h5>
+                                
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center">
+                                    <img :src="personajeSeleccionado.image" class="img-fluid rounded-circle mb-3" alt="Img" style="width: 150px; height: 150px;">
+                                    <h5>{{ personajeSeleccionado.name }}</h5>
+                                </div>
+                                <hr>
+                                <table class="table table-sm table-borderLess">
+                                    <tr>
+                                        <th>Estado:</th>
+                                        <td>
+                                            <span v-if="personajeSeleccionado.status == 'Alive'" class="badge bg-success">Alive</span>
+                                            <span v-else-if="personajeSeleccionado.status == 'Dead'" class="badge bg-danger">Dead</span>
+                                            <span v-else class="badge bg-warning">Unknown</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Genero:</th>
+                                        <td>
+                                            <span v-if="personajeSeleccionado.gender == 'Male'" class="badge bg-primary">Male</span>
+                                            <span v-else-if="personajeSeleccionado.gender == 'Female'" class="badge bg-danger">Female</span>
+                                            <span v-else class="badge bg-secundary">Unknown</span>
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <th>Especie:</th>
+                                        <td>{{ personajeSeleccionado.species }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Origen:</th>
+                                        <td>{{ (personajeSeleccionado.origin) ? personajeSeleccionado.origin.name : '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Locacion:</th>
+                                        <td>{{ (personajeSeleccionado.location) ? personajeSeleccionado.location.name : '' }}</td>
+                                    </tr>
+                                </table>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+
+        </div>
+        
+
+
+        
+
+            <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+            <script src="https://unpkg.com/axios/dist/axios.min.js"></script>    
+        <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+
+        
+
+        
+
+        <script>
+            const { createApp, ref, onMounted } = Vue
+            
+            createApp({
+                setup() {
+                    const personajes = ref([]);
+                    const informacion = ref({});
+                    const personajeSeleccionado = ref({});
+
+                    onMounted(() => {
+                        obtenerPersonajes();
+                    })
+
+                    const obtenerPersonajes = async () => {
+                        try {
+                                const {data} = await axios.get('https://rickandmortyapi.com/api/character');
+                                console.log(data);
+
+                                // ... para cuando el API devuelva un array
+                                personajes.value.push(...data.results);
+                                informacion.value = data.info;
+                            } catch (error) {
+                                console.error(error);
+                            }
+                    }
+                    const anterior = async() => {
+                        try {
+                            const {data} = await axios.get(informacion.value.prev);
+                            personajes.value = [];
+                            personajes.value.push(...data.results);
+                            informacion.value = data.info;
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
+                    const siguiente = async() => {
+                        try {
+                            const {data} = await axios.get(informacion.value.next);
+                            personajes.value = [];
+                            personajes.value.push(...data.results);
+                            informacion.value = data.info;
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
+
+                    const abrirModal = (item) => {
+                        personajeSeleccionado.value = item;
+                        const modal = new bootstrap.Modal(document.getElementById('modalPersonaje'));
+                        modal.show();
+                    }
+
+                    return {
+                        personajes,
+                        obtenerPersonajes,
+                        anterior,
+                        siguiente,
+                        informacion,
+                        abrirModal,
+                        personajeSeleccionado,
+
+                    }
+                }
+            }).mount('#app')
+        </script>
+    </body>
+</html>
